@@ -1,4 +1,15 @@
-GET http://localhost:8080
+GET http://localhost:8080/api/fetcher
 Accept: application/json
+
+###
+
+POST http://localhost:8080/api/fetcher
+Content-Type: application/json
+
+{
+  "id": 25,
+  "url": "abc url",
+  "interval": 60
+}
 
 ###

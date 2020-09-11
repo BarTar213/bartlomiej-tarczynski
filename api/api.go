@@ -5,14 +5,16 @@ import (
 	"net/http"
 
 	"github.com/BarTar213/go-template/config"
+	"github.com/BarTar213/go-template/storage"
 	"github.com/gin-gonic/gin"
 )
 
 type Api struct {
-	Port   string
-	Router *gin.Engine
-	Config *config.Config
-	Logger *log.Logger
+	Port    string
+	Router  *gin.Engine
+	Config  *config.Config
+	Storage storage.Storage
+	Logger  *log.Logger
 }
 
 func WithConfig(conf *config.Config) func(a *Api) {
@@ -27,6 +29,12 @@ func WithLogger(logger *log.Logger) func(a *Api) {
 	}
 }
 
+func WithStorage(storage storage.Storage) func(a *Api) {
+	return func(a *Api) {
+		a.Storage = storage
+	}
+}
+
 func NewApi(options ...func(api *Api)) *Api {
 	a := &Api{
 		Router: gin.Default(),
@@ -36,7 +44,17 @@ func NewApi(options ...func(api *Api)) *Api {
 		option(a)
 	}
 
-	a.Router.GET("/", a.health)
+	h := NewFetcherHandlers(a.Storage, a.Logger)
+
+	a.Router.Use(gin.Recovery())
+	fetchers := a.Router.Group("/api/fetcher")
+	{
+		fetchers.GET("", h.GetFetchers)
+		fetchers.POST("", h.AddFetcher)
+		fetchers.DELETE("", h.DeleteFetcher)
+
+		fetchers.GET("/:id/history")
+	}
 
 	return a
 }
