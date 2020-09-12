@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/BarTar213/go-template/models"
+import "github.com/BarTar213/bartlomiej-tarczynski/models"
 
 func (p *Postgres) GetFetchers() ([]models.Fetcher, error) {
 	fetchers := make([]models.Fetcher, 0)

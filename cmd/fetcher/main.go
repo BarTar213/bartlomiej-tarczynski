@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/BarTar213/go-template/api"
-	"github.com/BarTar213/go-template/config"
-	"github.com/BarTar213/go-template/storage"
+	"github.com/BarTar213/bartlomiej-tarczynski/api"
+	"github.com/BarTar213/bartlomiej-tarczynski/config"
+	"github.com/BarTar213/bartlomiej-tarczynski/storage"
 )
 
 func main() {

@@ -3,8 +3,8 @@ package storage
 import (
 	"context"
 
-	"github.com/BarTar213/go-template/config"
-	"github.com/BarTar213/go-template/models"
+	"github.com/BarTar213/bartlomiej-tarczynski/config"
+	"github.com/BarTar213/bartlomiej-tarczynski/models"
 	"github.com/go-pg/pg/v10"
 )
 

@@ -2,10 +2,9 @@ package api
 
 import (
 	"log"
-	"net/http"
 
-	"github.com/BarTar213/go-template/config"
-	"github.com/BarTar213/go-template/storage"
+	"github.com/BarTar213/bartlomiej-tarczynski/config"
+	"github.com/BarTar213/bartlomiej-tarczynski/storage"
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,16 +43,16 @@ func NewApi(options ...func(api *Api)) *Api {
 		option(a)
 	}
 
-	h := NewFetcherHandlers(a.Storage, a.Logger)
+	h := NewFetcherHandlers(a.Storage, a.Logger, a.Config)
 
 	a.Router.Use(gin.Recovery())
 	fetchers := a.Router.Group("/api/fetcher")
 	{
 		fetchers.GET("", h.GetFetchers)
 		fetchers.POST("", h.AddFetcher)
-		fetchers.DELETE("", h.DeleteFetcher)
+		fetchers.DELETE("/:id", h.DeleteFetcher)
 
-		fetchers.GET("/:id/history")
+		fetchers.GET("/:id/history", h.GetHistory)
 	}
 
 	return a
@@ -61,8 +60,4 @@ func NewApi(options ...func(api *Api)) *Api {
 
 func (a *Api) Run() error {
 	return a.Router.Run(a.Config.Api.Port)
-}
-
-func (a *Api) health(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, "healthy")
 }

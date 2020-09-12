@@ -1,4 +1,4 @@
-module github.com/BarTar213/go-template
+module github.com/BarTar213/bartlomiej-tarczynski
 
 go 1.15
 

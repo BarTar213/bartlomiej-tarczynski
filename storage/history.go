@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/BarTar213/go-template/models"
+import "github.com/BarTar213/bartlomiej-tarczynski/models"
 
 func (p *Postgres) GetHistory(id int) ([]models.History, error) {
 	history := make([]models.History, 0)
