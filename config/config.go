@@ -7,11 +7,20 @@ import (
 )
 
 type Config struct {
-	Api Api
+	Api      Api
+	Postgres Postgres
 }
 
 type Api struct {
-	Port string
+	Port             string
+	MaxContentLength int64
+}
+
+type Postgres struct {
+	Address  string
+	User     string
+	Password string
+	Database string
 }
 
 func NewConfig(fileName string) *Config {
