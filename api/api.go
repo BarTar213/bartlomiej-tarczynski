@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/BarTar213/bartlomiej-tarczynski/config"
+	"github.com/BarTar213/bartlomiej-tarczynski/middleware"
 	"github.com/BarTar213/bartlomiej-tarczynski/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -43,13 +44,14 @@ func NewApi(options ...func(api *Api)) *Api {
 		option(a)
 	}
 
-	h := NewFetcherHandlers(a.Storage, a.Logger, a.Config)
+	h := NewFetcherHandlers(a.Storage, a.Logger)
 
 	a.Router.Use(gin.Recovery())
 	fetchers := a.Router.Group("/api/fetcher")
 	{
 		fetchers.GET("", h.GetFetchers)
-		fetchers.POST("", h.AddFetcher)
+		fetchers.Use(middleware.CheckContentLength(a.Config.Api.MaxContentLength)).PUT("/:id", h.UpdateFetcher)
+		fetchers.Use(middleware.CheckContentLength(a.Config.Api.MaxContentLength)).POST("", h.AddFetcher)
 		fetchers.DELETE("/:id", h.DeleteFetcher)
 
 		fetchers.GET("/:id/history", h.GetHistory)

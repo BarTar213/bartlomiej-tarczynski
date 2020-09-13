@@ -13,7 +13,7 @@ type Config struct {
 
 type Api struct {
 	Port             string
-	MaxContentLength int
+	MaxContentLength int64
 }
 
 type Postgres struct {

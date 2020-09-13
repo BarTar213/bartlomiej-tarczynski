@@ -17,6 +17,16 @@ func (p *Postgres) AddFetcher(fetcher *models.Fetcher) error {
 	return err
 }
 
+func (p *Postgres) UpdateFetcher(fetcher *models.Fetcher) error {
+	_, err := p.db.Model(fetcher).
+		WherePK().
+		Set("url=?url, interval=?interval").
+		Returning("id").
+		Update()
+
+	return err
+}
+
 func (p *Postgres) DeleteFetcher(id int) error {
 	_, err := p.db.Exec("DELETE FROM fetchers WHERE id=?", id)
 

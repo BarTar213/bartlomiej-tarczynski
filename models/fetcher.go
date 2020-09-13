@@ -1,6 +1,9 @@
 package models
 
-import "errors"
+import (
+	"errors"
+	"net/url"
+)
 
 type Fetcher struct {
 	Id       int    `json:"id"`
@@ -15,6 +18,11 @@ func (f *Fetcher) Validate() error {
 
 	if f.Interval <= 0 {
 		return errors.New("interval must be greater than 0")
+	}
+
+	_, err := url.ParseRequestURI(f.Url)
+	if err != nil {
+		return errors.New("invalid url")
 	}
 
 	return nil

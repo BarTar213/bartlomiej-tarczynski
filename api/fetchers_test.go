@@ -351,13 +351,12 @@ func TestNewFetcherHandlers(t *testing.T) {
 			want: &FetcherHandlers{
 				storage:          &mock.Storage{},
 				logger:           logger,
-				maxContentLength: 1024,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewFetcherHandlers(tt.args.storage, tt.args.logger, tt.args.conf); !reflect.DeepEqual(got, tt.want) {
+			if got := NewFetcherHandlers(tt.args.storage, tt.args.logger); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewFetcherHandlers() = %v, want %v", got, tt.want)
 			}
 		})
