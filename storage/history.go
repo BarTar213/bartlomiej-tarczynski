@@ -10,3 +10,9 @@ func (p *Postgres) GetHistory(id int) ([]models.History, error) {
 
 	return history, err
 }
+
+func (p *Postgres) AddHistory(history *models.History) error {
+	_, err := p.db.Model(&history).Insert()
+
+	return err
+}

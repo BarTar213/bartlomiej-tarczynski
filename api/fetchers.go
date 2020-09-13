@@ -7,6 +7,7 @@ import (
 
 	"github.com/BarTar213/bartlomiej-tarczynski/models"
 	"github.com/BarTar213/bartlomiej-tarczynski/storage"
+	"github.com/BarTar213/bartlomiej-tarczynski/worker"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,14 +19,16 @@ const (
 )
 
 type FetcherHandlers struct {
-	storage          storage.Storage
-	logger           *log.Logger
+	storage storage.Storage
+	worker  *worker.Worker
+	logger  *log.Logger
 }
 
-func NewFetcherHandlers(storage storage.Storage, logger *log.Logger) *FetcherHandlers {
+func NewFetcherHandlers(s storage.Storage, w *worker.Worker, l *log.Logger) *FetcherHandlers {
 	return &FetcherHandlers{
-		storage:          storage,
-		logger:           logger,
+		storage: s,
+		worker:  w,
+		logger:  l,
 	}
 }
 
@@ -57,8 +60,10 @@ func (h *FetcherHandlers) AddFetcher(c *gin.Context) {
 		handlePostgresError(c, h.logger, err, fetcherResource)
 		return
 	}
+
+	go
 	//todo change return
-	c.JSON(http.StatusCreated, fetcher)
+		c.JSON(http.StatusCreated, fetcher)
 }
 
 func (h *FetcherHandlers) DeleteFetcher(c *gin.Context) {

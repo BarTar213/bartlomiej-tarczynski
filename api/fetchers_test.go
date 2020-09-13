@@ -15,6 +15,7 @@ import (
 	"github.com/BarTar213/bartlomiej-tarczynski/mock"
 	"github.com/BarTar213/bartlomiej-tarczynski/models"
 	"github.com/BarTar213/bartlomiej-tarczynski/storage"
+	"github.com/BarTar213/bartlomiej-tarczynski/worker"
 	"github.com/gin-gonic/gin"
 )
 
@@ -334,6 +335,7 @@ func TestNewFetcherHandlers(t *testing.T) {
 	type args struct {
 		storage storage.Storage
 		logger  *log.Logger
+		worker  *worker.Worker
 		conf    *config.Config
 	}
 	tests := []struct {
@@ -356,7 +358,7 @@ func TestNewFetcherHandlers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewFetcherHandlers(tt.args.storage, tt.args.logger); !reflect.DeepEqual(got, tt.want) {
+			if got := NewFetcherHandlers(tt.args.storage, tt.args.worker, tt.args.logger); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewFetcherHandlers() = %v, want %v", got, tt.want)
 			}
 		})

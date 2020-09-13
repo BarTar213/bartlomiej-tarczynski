@@ -9,11 +9,13 @@ import (
 const errMsg = "example error msg"
 
 type Storage struct {
-	GetFetchersErr   bool
-	AddFetcherErr    bool
-	UpdateFetcherErr bool
-	DeleteFetcherErr bool
-	GetHistoryErr    bool
+	GetFetchersErr        bool
+	AddFetcherErr         bool
+	UpdateFetcherErr      bool
+	UpdateFetcherJobIdErr bool
+	DeleteFetcherErr      bool
+	GetHistoryErr         bool
+	AddHistoryErr         bool
 }
 
 func (s *Storage) GetFetchers() ([]models.Fetcher, error) {
@@ -46,6 +48,20 @@ func (s *Storage) GetHistory(id int) ([]models.History, error) {
 
 func (s *Storage) UpdateFetcher(fetcher *models.Fetcher) error {
 	if s.UpdateFetcherErr {
+		return errors.New(errMsg)
+	}
+	return nil
+}
+
+func (s *Storage) UpdateFetcherJobId(fetcherId, jobId int) error {
+	if s.UpdateFetcherJobIdErr {
+		return errors.New(errMsg)
+	}
+	return nil
+}
+
+func (s *Storage) AddHistory(history *models.History) error {
+	if s.AddHistoryErr {
 		return errors.New(errMsg)
 	}
 	return nil

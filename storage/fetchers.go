@@ -27,6 +27,12 @@ func (p *Postgres) UpdateFetcher(fetcher *models.Fetcher) error {
 	return err
 }
 
+func (p *Postgres) UpdateFetcherJobId(fetcherId, jobId int) error {
+	_, err := p.db.Exec("UPDATE fetchers SET job_id=? WHERE id=?", fetcherId, jobId)
+
+	return err
+}
+
 func (p *Postgres) DeleteFetcher(id int) error {
 	_, err := p.db.Exec("DELETE FROM fetchers WHERE id=?", id)
 
