@@ -21,10 +21,17 @@ func (f *Fetcher) Validate() error {
 		return errors.New("interval must be greater than 0")
 	}
 
-	_, err := url.Parse(f.Url)
+	_, err := url.ParseRequestURI(f.Url)
 	if err != nil {
 		return errors.New("invalid url")
 	}
 
 	return nil
+}
+
+func (f *Fetcher) Reset() {
+	f.Id = 0
+	f.Url = ""
+	f.Interval = 0
+	f.JobId = 0
 }

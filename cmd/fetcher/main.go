@@ -36,5 +36,6 @@ func main() {
 	signal.Notify(shutDownSignal, syscall.SIGINT, syscall.SIGTERM)
 
 	<-shutDownSignal
+	a.Worker.Stop()
 	logger.Print("exited from app")
 }

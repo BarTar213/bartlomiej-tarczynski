@@ -32,8 +32,10 @@ func New(storage storage.Storage, historyPool *sync.Pool) *Worker {
 }
 
 func (w *Worker) RegisterJob(fetcher *models.Fetcher) error {
+	url := fetcher.Url
+	id := fetcher.Id
 	entryID, err := w.c.AddFunc(fmt.Sprintf("@every %ds", fetcher.Interval), func() {
-		w.doJob(fetcher.Url, fetcher.Id)
+		w.doJob(url, id)
 	})
 	if err != nil {
 		return err
@@ -89,6 +91,16 @@ func (w *Worker) doJob(url string, fetcherId int) {
 func (w *Worker) ReturnHistoryItem(h *models.History) {
 	h.Reset()
 	w.historyPool.Put(h)
+}
+
+func (w *Worker) Stop() {
+	ctx := w.c.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		}
+	}
 }
 
 func pointer(s string) *string {

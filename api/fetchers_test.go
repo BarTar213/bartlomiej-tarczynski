@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/BarTar213/bartlomiej-tarczynski/config"
@@ -22,9 +23,11 @@ import (
 var logger = log.New(os.Stdout, "", log.LstdFlags)
 
 const (
-	validId    = "5"
-	invalidId  = "5a"
-	exampleUrl = "https://httpbin.org/range/15"
+	validId     = "5"
+	invalidId   = "5a"
+	exampleUrl  = "https://httpbin.org/range/15"
+	urlKey      = "url"
+	intervalKey = "interval"
 )
 
 func TestFetcherHandlers_AddFetcher(t *testing.T) {
@@ -79,7 +82,7 @@ func TestFetcherHandlers_AddFetcher(t *testing.T) {
 				},
 			},
 			body: map[string]interface{}{
-				"url": 65,
+				urlKey: 65,
 			},
 			wantStatus: http.StatusBadRequest,
 		},
@@ -340,6 +343,7 @@ func TestNewFetcherHandlers(t *testing.T) {
 		storage storage.Storage
 		logger  *log.Logger
 		worker  *worker.Worker
+		pool    *sync.Pool
 		conf    *config.Config
 	}
 	tests := []struct {
@@ -362,7 +366,7 @@ func TestNewFetcherHandlers(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewFetcherHandlers(tt.args.storage, tt.args.worker, tt.args.logger); !reflect.DeepEqual(got, tt.want) {
+			if got := NewFetcherHandlers(tt.args.storage, tt.args.worker, tt.args.pool, tt.args.logger); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewFetcherHandlers() = %v, want %v", got, tt.want)
 			}
 		})
@@ -440,7 +444,7 @@ func TestFetcherHandlers_UpdateFetcher(t *testing.T) {
 				},
 			},
 			body: map[string]interface{}{
-				"url": 65,
+				urlKey: 65,
 			},
 			fetcherId:  validId,
 			wantStatus: http.StatusBadRequest,
@@ -459,6 +463,24 @@ func TestFetcherHandlers_UpdateFetcher(t *testing.T) {
 			},
 			fetcherId:  validId,
 			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name: "negative_update_fetcher_get_fetcher_job_error",
+			fields: fields{
+				storage: &mock.Storage{
+					GetFetcherJobErr: true,
+				},
+				logger: logger,
+				conf: &config.Config{
+					Api: config.Api{MaxContentLength: 1024},
+				},
+			},
+			body: &models.Fetcher{
+				Url:      exampleUrl,
+				Interval: 60,
+			},
+			fetcherId:  validId,
+			wantStatus: http.StatusInternalServerError,
 		},
 		{
 			name: "negative_update_fetcher_storage_error",

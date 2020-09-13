@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/BarTar213/bartlomiej-tarczynski/models"
 	"github.com/BarTar213/bartlomiej-tarczynski/storage"
@@ -20,15 +21,17 @@ const (
 )
 
 type FetcherHandlers struct {
-	storage storage.Storage
-	worker  *worker.Worker
-	logger  *log.Logger
+	storage     storage.Storage
+	worker      *worker.Worker
+	fetcherPool *sync.Pool
+	logger      *log.Logger
 }
 
-func NewFetcherHandlers(s storage.Storage, w *worker.Worker, l *log.Logger) *FetcherHandlers {
+func NewFetcherHandlers(s storage.Storage, w *worker.Worker, pool *sync.Pool, l *log.Logger) *FetcherHandlers {
 	return &FetcherHandlers{
 		storage: s,
 		worker:  w,
+		fetcherPool: pool,
 		logger:  l,
 	}
 }
@@ -44,7 +47,9 @@ func (h *FetcherHandlers) GetFetchers(c *gin.Context) {
 }
 
 func (h *FetcherHandlers) AddFetcher(c *gin.Context) {
-	fetcher := &models.Fetcher{}
+	fetcher := h.fetcherPool.Get().(*models.Fetcher)
+	defer h.ReturnFetcher(fetcher)
+
 	err := c.ShouldBindJSON(fetcher)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{Error: invalidBodyErr})
@@ -56,6 +61,12 @@ func (h *FetcherHandlers) AddFetcher(c *gin.Context) {
 		return
 	}
 
+	err = h.storage.AddFetcher(fetcher)
+	if err != nil {
+		handlePostgresError(c, h.logger, err, fetcherResource)
+		return
+	}
+
 	err = h.worker.RegisterJob(fetcher)
 	if err != nil {
 		h.logger.Printf("Job registration err: %s", err)
@@ -63,7 +74,7 @@ func (h *FetcherHandlers) AddFetcher(c *gin.Context) {
 		return
 	}
 
-	err = h.storage.AddFetcher(fetcher)
+	err = h.storage.UpdateFetcherJobId(fetcher.Id, fetcher.JobId)
 	if err != nil {
 		handlePostgresError(c, h.logger, err, fetcherResource)
 		return
@@ -139,10 +150,9 @@ func (h *FetcherHandlers) GetHistory(c *gin.Context) {
 		return
 	}
 
-	//todo fix return if not exist
 	history, err := h.storage.GetHistory(id)
 	if err != nil {
-		handlePostgresError(c, h.logger, err, fetcherResource)
+		handlePostgresError(c, h.logger, err, "fetcher history")
 		return
 	}
 

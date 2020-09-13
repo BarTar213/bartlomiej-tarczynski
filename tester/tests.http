@@ -37,7 +37,7 @@ Accept: application/json
 
 ###
 
-GET http://localhost:8080/api/fetcher/25/history
+GET http://localhost:8080/api/fetcher/47/history
 Accept: application/json
 
 ###

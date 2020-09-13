@@ -11,8 +11,6 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
-
-
 func Test_handlePostgresError(t *testing.T) {
 	type args struct {
 		logger   *log.Logger
@@ -40,7 +38,7 @@ func Test_handlePostgresError(t *testing.T) {
 				err:      &mock.PgError{FieldCode: "23503"},
 				resource: fetcherResource,
 			},
-			wantStatus: http.StatusBadRequest,
+			wantStatus: http.StatusNotFound,
 		},
 		{
 			name: "23505_error",

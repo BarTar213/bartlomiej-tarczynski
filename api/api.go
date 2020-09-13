@@ -19,7 +19,7 @@ type Api struct {
 	Storage     storage.Storage
 	HistoryPool *sync.Pool
 	FetcherPool *sync.Pool
-	worker      *worker.Worker
+	Worker      *worker.Worker
 	Logger      *log.Logger
 }
 
@@ -43,7 +43,7 @@ func WithStorage(storage storage.Storage) func(a *Api) {
 
 func WithWorker() func(a *Api) {
 	return func(a *Api) {
-		a.worker = worker.New(a.Storage, a.HistoryPool)
+		a.Worker = worker.New(a.Storage, a.HistoryPool)
 	}
 }
 
@@ -66,7 +66,7 @@ func NewApi(options ...func(api *Api)) *Api {
 		option(a)
 	}
 
-	h := NewFetcherHandlers(a.Storage, a.worker, a.Logger)
+	h := NewFetcherHandlers(a.Storage, a.Worker, a.FetcherPool, a.Logger)
 
 	a.Router.Use(gin.Recovery())
 	fetchers := a.Router.Group("/api/fetcher")
