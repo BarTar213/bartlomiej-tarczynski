@@ -41,6 +41,12 @@ func WithStorage(storage storage.Storage) func(a *Api) {
 	}
 }
 
+func WithWorker() func(a *Api) {
+	return func(a *Api) {
+		a.worker = worker.New(a.Storage, a.HistoryPool)
+	}
+}
+
 func NewApi(options ...func(api *Api)) *Api {
 	a := &Api{
 		Router: gin.Default(),

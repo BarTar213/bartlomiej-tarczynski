@@ -16,6 +16,7 @@ const (
 	fetcherResource = "fetcher"
 
 	invalidBodyErr = "invalid body"
+	registerJobErr = "couldn't register job associated with fetcher"
 )
 
 type FetcherHandlers struct {
@@ -55,15 +56,21 @@ func (h *FetcherHandlers) AddFetcher(c *gin.Context) {
 		return
 	}
 
+	err = h.worker.RegisterJob(fetcher)
+	if err != nil {
+		h.logger.Printf("Job registration err: %s", err)
+		c.JSON(http.StatusInternalServerError, models.Response{Error: registerJobErr})
+		return
+	}
+
 	err = h.storage.AddFetcher(fetcher)
 	if err != nil {
 		handlePostgresError(c, h.logger, err, fetcherResource)
 		return
 	}
 
-	go
 	//todo change return
-		c.JSON(http.StatusCreated, fetcher)
+	c.JSON(http.StatusCreated, fetcher)
 }
 
 func (h *FetcherHandlers) DeleteFetcher(c *gin.Context) {
@@ -73,11 +80,12 @@ func (h *FetcherHandlers) DeleteFetcher(c *gin.Context) {
 		return
 	}
 
-	err = h.storage.DeleteFetcher(id)
+	jobId, err := h.storage.DeleteFetcher(id)
 	if err != nil {
 		handlePostgresError(c, h.logger, err, fetcherResource)
 		return
 	}
+	go h.worker.DeregisterJob(jobId)
 
 	c.JSON(http.StatusOK, models.Response{})
 }
@@ -101,6 +109,19 @@ func (h *FetcherHandlers) UpdateFetcher(c *gin.Context) {
 		return
 	}
 
+	jobId, err := h.storage.GetFetcherJob(id)
+	if err != nil {
+		handlePostgresError(c, h.logger, err, fetcherResource)
+		return
+	}
+
+	err = h.worker.UpdateJob(fetcher, jobId)
+	if err != nil {
+		h.logger.Printf("Job update err: %s", err)
+		c.JSON(http.StatusInternalServerError, models.Response{Error: registerJobErr})
+		return
+	}
+
 	fetcher.Id = id
 	err = h.storage.UpdateFetcher(fetcher)
 	if err != nil {
@@ -118,6 +139,7 @@ func (h *FetcherHandlers) GetHistory(c *gin.Context) {
 		return
 	}
 
+	//todo fix return if not exist
 	history, err := h.storage.GetHistory(id)
 	if err != nil {
 		handlePostgresError(c, h.logger, err, fetcherResource)

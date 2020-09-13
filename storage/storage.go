@@ -10,10 +10,11 @@ import (
 
 type Storage interface {
 	GetFetchers() ([]models.Fetcher, error)
+	GetFetcherJob(id int) (int, error)
 	AddFetcher(fetcher *models.Fetcher) error
 	UpdateFetcher(fetcher *models.Fetcher) error
 	UpdateFetcherJobId(fetcherId, jobId int) error
-	DeleteFetcher(id int) error
+	DeleteFetcher(id int) (int, error)
 
 	GetHistory(id int) ([]models.History, error)
 	AddHistory(history *models.History) error

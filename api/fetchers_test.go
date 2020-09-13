@@ -122,6 +122,7 @@ func TestFetcherHandlers_AddFetcher(t *testing.T) {
 				WithConfig(tt.fields.conf),
 				WithLogger(tt.fields.logger),
 				WithStorage(tt.fields.storage),
+				WithWorker(),
 			)
 
 			jsonBody, _ := json.Marshal(tt.body)
@@ -194,6 +195,7 @@ func TestFetcherHandlers_DeleteFetcher(t *testing.T) {
 				WithConfig(tt.fields.conf),
 				WithLogger(tt.fields.logger),
 				WithStorage(tt.fields.storage),
+				WithWorker(),
 			)
 
 			w := httptest.NewRecorder()
@@ -249,6 +251,7 @@ func TestFetcherHandlers_GetFetchers(t *testing.T) {
 				WithConfig(tt.fields.conf),
 				WithLogger(tt.fields.logger),
 				WithStorage(tt.fields.storage),
+				WithWorker(),
 			)
 
 			w := httptest.NewRecorder()
@@ -319,6 +322,7 @@ func TestFetcherHandlers_GetHistory(t *testing.T) {
 				WithConfig(tt.fields.conf),
 				WithLogger(tt.fields.logger),
 				WithStorage(tt.fields.storage),
+				WithWorker(),
 			)
 
 			w := httptest.NewRecorder()
@@ -482,6 +486,7 @@ func TestFetcherHandlers_UpdateFetcher(t *testing.T) {
 				WithConfig(tt.fields.conf),
 				WithLogger(tt.fields.logger),
 				WithStorage(tt.fields.storage),
+				WithWorker(),
 			)
 
 			jsonBody, _ := json.Marshal(tt.body)

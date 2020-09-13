@@ -26,6 +26,7 @@ func main() {
 		api.WithConfig(conf),
 		api.WithLogger(logger),
 		api.WithStorage(postgres),
+		api.WithWorker(),
 	)
 
 	go a.Run()
