@@ -74,12 +74,15 @@ func (w *Worker) processJob(url string, fetcherId int) {
 	response, err := w.client.Do(req)
 	duration := time.Since(t).Seconds()
 	if err == nil {
-		history.Duration = duration
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err == nil {
 			history.Response = pointer(string(body))
 		}
+	}
+
+	if duration < 5 {
+		history.Duration = duration
 	}
 
 	history.FetcherId = fetcherId
