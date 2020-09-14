@@ -1,7 +1,14 @@
 package models
 
 type History struct {
-	Response  string `json:"response"`
+	FetcherId int     `json:"-"`
+	Response  *string `json:"response"`
 	Duration  float64 `json:"duration"`
-	CreatedAt float64 `json:"created_at"`
+	CreatedAt int64   `json:"created_at"`
+}
+
+func (h *History) Reset() {
+	h.Response = nil
+	h.Duration = 0
+	h.CreatedAt = 0
 }

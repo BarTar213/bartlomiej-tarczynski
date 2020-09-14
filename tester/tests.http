@@ -7,18 +7,18 @@ POST http://localhost:8080/api/fetcher
 Content-Type: application/json
 
 {
-  "url": "abc",
-  "interval": 12
+  "url": "https://httpbin.org/delay/10",
+  "interval": 2
 }
 
 ###
 
-PUT http://localhost:8080/api/fetcher/100
+PUT http://localhost:8080/api/fetcher/21
 Content-Type: application/json
 
 {
-  "url": "https://golang.cafe/blog/how-to-validate-url-in-go.html",
-  "interval": 12
+  "url": "https://httpbin.org/range/10",
+  "interval": 3
 }
 
 ###
@@ -32,12 +32,12 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:8080/api/fetcher/100
+DELETE http://localhost:8080/api/fetcher/21
 Accept: application/json
 
 ###
 
-GET http://localhost:8080/api/fetcher/100/history
+GET http://localhost:8080/api/fetcher/51/history
 Accept: application/json
 
 ###

@@ -2,19 +2,25 @@ package api
 
 import (
 	"log"
+	"sync"
 
 	"github.com/BarTar213/bartlomiej-tarczynski/config"
 	"github.com/BarTar213/bartlomiej-tarczynski/middleware"
+	"github.com/BarTar213/bartlomiej-tarczynski/models"
 	"github.com/BarTar213/bartlomiej-tarczynski/storage"
+	"github.com/BarTar213/bartlomiej-tarczynski/worker"
 	"github.com/gin-gonic/gin"
 )
 
 type Api struct {
-	Port    string
-	Router  *gin.Engine
-	Config  *config.Config
-	Storage storage.Storage
-	Logger  *log.Logger
+	Port        string
+	Router      *gin.Engine
+	Config      *config.Config
+	Storage     storage.Storage
+	HistoryPool *sync.Pool
+	FetcherPool *sync.Pool
+	Worker      *worker.Worker
+	Logger      *log.Logger
 }
 
 func WithConfig(conf *config.Config) func(a *Api) {
@@ -35,16 +41,32 @@ func WithStorage(storage storage.Storage) func(a *Api) {
 	}
 }
 
+func WithWorker() func(a *Api) {
+	return func(a *Api) {
+		a.Worker = worker.New(a.Storage, a.HistoryPool, a.Logger)
+	}
+}
+
 func NewApi(options ...func(api *Api)) *Api {
 	a := &Api{
 		Router: gin.Default(),
+		HistoryPool: &sync.Pool{
+			New: func() interface{} {
+				return new(models.History)
+			},
+		},
+		FetcherPool: &sync.Pool{
+			New: func() interface{} {
+				return new(models.Fetcher)
+			},
+		},
 	}
 
 	for _, option := range options {
 		option(a)
 	}
 
-	h := NewFetcherHandlers(a.Storage, a.Logger)
+	h := NewFetcherHandlers(a.Storage, a.Worker, a.FetcherPool, a.Logger)
 
 	a.Router.Use(gin.Recovery())
 	fetchers := a.Router.Group("/api/fetcher")

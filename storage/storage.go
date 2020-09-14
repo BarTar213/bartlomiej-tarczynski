@@ -2,6 +2,11 @@ package storage
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"strings"
+	"time"
 
 	"github.com/BarTar213/bartlomiej-tarczynski/config"
 	"github.com/BarTar213/bartlomiej-tarczynski/models"
@@ -10,11 +15,14 @@ import (
 
 type Storage interface {
 	GetFetchers() ([]models.Fetcher, error)
+	GetFetcherJob(id int) (int, error)
 	AddFetcher(fetcher *models.Fetcher) error
 	UpdateFetcher(fetcher *models.Fetcher) error
-	DeleteFetcher(id int) error
+	UpdateFetcherJobId(fetcherId, jobId int) error
+	DeleteFetcher(id int) (int, error)
 
 	GetHistory(id int) ([]models.History, error)
+	AddHistory(history *models.History) error
 }
 
 type Postgres struct {
@@ -34,5 +42,34 @@ func NewPostgres(config *config.Postgres) (Storage, error) {
 		return nil, err
 	}
 
+	err = initTables(db)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("could not init tables, err: %s", err))
+	}
+
 	return &Postgres{db: db}, nil
+}
+
+func initTables(db *pg.DB) error {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err := db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		b, err := ioutil.ReadFile("tables.sql")
+		if err != nil {
+			return err
+		}
+
+		queries := strings.Split(string(b), ";")
+		for _, query := range queries {
+			if len(query) == 0 {
+				continue
+			}
+			_, err := tx.Exec(query)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	return err
 }
