@@ -43,7 +43,7 @@ func WithStorage(storage storage.Storage) func(a *Api) {
 
 func WithWorker() func(a *Api) {
 	return func(a *Api) {
-		a.Worker = worker.New(a.Storage, a.HistoryPool)
+		a.Worker = worker.New(a.Storage, a.HistoryPool, a.Logger)
 	}
 }
 

@@ -35,3 +35,7 @@ func (f *Fetcher) Reset() {
 	f.Interval = 0
 	f.JobId = 0
 }
+
+type Id struct {
+	Id int `json:"id"`
+}

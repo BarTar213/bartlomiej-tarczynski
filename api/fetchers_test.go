@@ -101,6 +101,23 @@ func TestFetcherHandlers_AddFetcher(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name: "negative_add_fetcher_update_job_id_error",
+			fields: fields{
+				storage: &mock.Storage{
+					UpdateFetcherJobIdErr: true,
+				},
+				logger: logger,
+				conf: &config.Config{
+					Api: config.Api{MaxContentLength: 1024},
+				},
+			},
+			body: &models.Fetcher{
+				Url:      exampleUrl,
+				Interval: 60,
+			},
+			wantStatus: http.StatusInternalServerError,
+		},
+		{
 			name: "negative_add_fetcher_storage_error",
 			fields: fields{
 				storage: &mock.Storage{

@@ -29,10 +29,10 @@ type FetcherHandlers struct {
 
 func NewFetcherHandlers(s storage.Storage, w *worker.Worker, pool *sync.Pool, l *log.Logger) *FetcherHandlers {
 	return &FetcherHandlers{
-		storage: s,
-		worker:  w,
+		storage:     s,
+		worker:      w,
 		fetcherPool: pool,
-		logger:  l,
+		logger:      l,
 	}
 }
 
@@ -80,8 +80,7 @@ func (h *FetcherHandlers) AddFetcher(c *gin.Context) {
 		return
 	}
 
-	//todo change return
-	c.JSON(http.StatusCreated, fetcher)
+	c.JSON(http.StatusCreated, models.Id{Id: fetcher.Id})
 }
 
 func (h *FetcherHandlers) DeleteFetcher(c *gin.Context) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -18,9 +19,10 @@ type Worker struct {
 	storage     storage.Storage
 	client      *http.Client
 	historyPool *sync.Pool
+	logger      *log.Logger
 }
 
-func New(storage storage.Storage, historyPool *sync.Pool) *Worker {
+func New(storage storage.Storage, historyPool *sync.Pool, l *log.Logger) *Worker {
 	c := cron.New(cron.WithSeconds())
 	c.Start()
 	return &Worker{
@@ -28,6 +30,7 @@ func New(storage storage.Storage, historyPool *sync.Pool) *Worker {
 		storage:     storage,
 		historyPool: historyPool,
 		client:      http.DefaultClient,
+		logger:      l,
 	}
 }
 
@@ -35,7 +38,7 @@ func (w *Worker) RegisterJob(fetcher *models.Fetcher) error {
 	url := fetcher.Url
 	id := fetcher.Id
 	entryID, err := w.c.AddFunc(fmt.Sprintf("@every %ds", fetcher.Interval), func() {
-		w.doJob(url, id)
+		w.processJob(url, id)
 	})
 	if err != nil {
 		return err
@@ -54,22 +57,24 @@ func (w Worker) UpdateJob(fetcher *models.Fetcher, id int) error {
 	return w.RegisterJob(fetcher)
 }
 
-func (w *Worker) doJob(url string, fetcherId int) {
+func (w *Worker) processJob(url string, fetcherId int) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		fmt.Printf("NewRequest: %s", err)
+		w.logger.Printf("NewRequest err: %s", err)
 		return
 	}
 
 	history := w.historyPool.Get().(*models.History)
+	history.Duration = 5
 	defer w.ReturnHistoryItem(history)
 
 	t := time.Now()
 	response, err := w.client.Do(req)
 	duration := time.Since(t).Seconds()
 	if err == nil {
+		history.Duration = duration
 		defer response.Body.Close()
 		body, err := ioutil.ReadAll(response.Body)
 		if err == nil {
@@ -79,11 +84,10 @@ func (w *Worker) doJob(url string, fetcherId int) {
 
 	history.FetcherId = fetcherId
 	history.CreatedAt = t.Unix()
-	history.Duration = duration
 
 	err = w.storage.AddHistory(history)
 	if err != nil {
-		fmt.Printf("AddHistory: %s", err)
+		w.logger.Printf("AddHistory err: %s", err)
 		return
 	}
 }
