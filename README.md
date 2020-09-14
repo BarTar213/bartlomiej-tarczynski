@@ -10,8 +10,7 @@ make binary
 ```
 or
 ```
-make binary
-./fetcher
+go run cmd/fetcher/main.go
 ```
 
 Project comes with a Makefile that contains following recipes:
