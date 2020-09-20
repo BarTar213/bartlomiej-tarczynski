@@ -12,6 +12,13 @@ func (p *Postgres) GetFetchers() ([]models.Fetcher, error) {
 	return fetchers, err
 }
 
+func (p *Postgres) GetFetchersForSync() ([]models.Fetcher, error) {
+	fetchers := make([]models.Fetcher, 0)
+	err := p.db.Model(&fetchers).Where("job_id=0").Select()
+
+	return fetchers, err
+}
+
 func (p *Postgres) GetFetcherJob(id int) (int, error){
 	var jobId int
 	_, err := p.db.QueryOne(pg.Scan(&jobId), "SELECT job_id FROM fetchers WHERE id=?", id)

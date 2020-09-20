@@ -10,8 +10,6 @@ import (
 	"github.com/go-pg/pg/v10"
 )
 
-const emptyString = ""
-
 func handlePostgresError(c *gin.Context, l *log.Logger, err error, resource string) {
 	if err == pg.ErrNoRows {
 		c.JSON(http.StatusBadRequest, models.Response{Error: fmt.Sprintf("%s with given id doesn't exist", resource)})

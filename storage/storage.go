@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -44,14 +43,15 @@ func NewPostgres(config *config.Postgres) (Storage, error) {
 
 	err = initTables(db)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("could not init tables, err: %s", err))
+		return nil, fmt.Errorf("could not init tables, err: %s", err)
 	}
 
 	return &Postgres{db: db}, nil
 }
 
 func initTables(db *pg.DB) error {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	err := db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		b, err := ioutil.ReadFile("tables.sql")
 		if err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -12,7 +13,8 @@ import (
 )
 
 func main() {
-	conf := config.NewConfig("fetcher.yml")
+	configFile := flag.String("fetcher-config", "fetcher.yml", "name of yml file with fetcher config")
+	conf := config.NewConfig(configFile)
 	logger := log.New(os.Stdout, "", log.LstdFlags)
 
 	logger.Printf("%+v\n", conf)
@@ -32,7 +34,7 @@ func main() {
 	go a.Run()
 	logger.Print("started app")
 
-	shutDownSignal := make(chan os.Signal)
+	shutDownSignal := make(chan os.Signal, 1)
 	signal.Notify(shutDownSignal, syscall.SIGINT, syscall.SIGTERM)
 
 	<-shutDownSignal

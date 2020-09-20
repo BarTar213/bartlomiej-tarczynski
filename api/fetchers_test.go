@@ -27,7 +27,6 @@ const (
 	invalidId   = "5a"
 	exampleUrl  = "https://httpbin.org/range/15"
 	urlKey      = "url"
-	intervalKey = "interval"
 )
 
 func TestFetcherHandlers_AddFetcher(t *testing.T) {
@@ -148,7 +147,7 @@ func TestFetcherHandlers_AddFetcher(t *testing.T) {
 			jsonBody, _ := json.Marshal(tt.body)
 
 			w := httptest.NewRecorder()
-			reqUrl := fmt.Sprintf("/api/fetcher")
+			reqUrl := "/api/fetcher"
 			req, _ := http.NewRequest(http.MethodPost, reqUrl, bytes.NewBuffer(jsonBody))
 
 			a.Router.ServeHTTP(w, req)
@@ -275,7 +274,7 @@ func TestFetcherHandlers_GetFetchers(t *testing.T) {
 			)
 
 			w := httptest.NewRecorder()
-			reqUrl := fmt.Sprintf("/api/fetcher")
+			reqUrl := "/api/fetcher"
 			req, _ := http.NewRequest(http.MethodGet, reqUrl, nil)
 
 			a.Router.ServeHTTP(w, req)

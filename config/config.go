@@ -23,8 +23,8 @@ type Postgres struct {
 	Database string
 }
 
-func NewConfig(fileName string) *Config {
-	viper.SetConfigFile(fileName)
+func NewConfig(fileName *string) *Config {
+	viper.SetConfigFile(*fileName)
 	viper.SetConfigType("yaml")
 
 	var config Config
