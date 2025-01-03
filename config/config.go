@@ -24,6 +24,7 @@ type Postgres struct {
 }
 
 func NewConfig(fileName *string) *Config {
+	fmt.Printf("test")
 	viper.SetConfigFile(*fileName)
 	viper.SetConfigType("yaml")
 
